@@ -845,56 +845,21 @@ NSMutableArray *mCopyArray = [array mutableCopy];
  2. 要么如第17行：使用`@synthesize foo = _foo;` ，关联 @property 与 ivar。
 
 更多信息，请戳- 》[ ***When should I use @synthesize explicitly?*** ](http://stackoverflow.com/a/19821816/3395008)
+
 ###16. objc中向一个nil对象发送消息将会发生什么？
 在 Objective-C 中向 nil 发送消息是完全有效的——只是在运行时不会有任何作用:
 
  1. 如果一个方法返回值是一个对象，那么发送给nil的消息将返回0(nil)。例如：  
-
  
  ```Objective-C
 Person * motherInlaw = [[aPerson spouse] mother];
 ```
-
-
  如果 spouse 对象为 nil，那么发送给 nil 的消息 mother 也将返回 nil。
  2. 如果方法返回值为指针类型，其指针大小为小于或者等于sizeof(void*)，float，double，long double 或者 long long 的整型标量，发送给 nil 的消息将返回0。
  2. 如果方法返回值为结构体,发送给 nil 的消息将返回0。结构体中各个字段的值将都是0。
  2. 如果方法的返回值不是上述提到的几种情况，那么发送给 nil 的消息的返回值将是未定义的。
 
-具体原因如下：
-
-
 > objc是动态语言，每个方法在运行时会被动态转为消息发送，即：objc_msgSend(receiver, selector)。
-
-
-那么，为了方便理解这个内容，还是贴一个objc的源代码：
-
-
- 
-```Objective-C
-// runtime.h（类在runtime中的定义）
-// http://weibo.com/luohanchenyilong/
-// https://github.com/ChenYilong
-
-struct objc_class {
-  Class isa OBJC_ISA_AVAILABILITY; //isa指针指向Meta Class，因为Objc的类的本身也是一个Object，为了处理这个关系，runtime就创造了Meta Class，当给类发送[NSObject alloc]这样消息时，实际上是把这个消息发给了Class Object
-  #if !__OBJC2__
-  Class super_class OBJC2_UNAVAILABLE; // 父类
-  const char *name OBJC2_UNAVAILABLE; // 类名
-  long version OBJC2_UNAVAILABLE; // 类的版本信息，默认为0
-  long info OBJC2_UNAVAILABLE; // 类信息，供运行期使用的一些位标识
-  long instance_size OBJC2_UNAVAILABLE; // 该类的实例变量大小
-  struct objc_ivar_list *ivars OBJC2_UNAVAILABLE; // 该类的成员变量链表
-  struct objc_method_list **methodLists OBJC2_UNAVAILABLE; // 方法定义的链表
-  struct objc_cache *cache OBJC2_UNAVAILABLE; // 方法缓存，对象接到一个消息会根据isa指针查找消息对象，这时会在method Lists中遍历，如果cache了，常用的方法调用时就能够提高调用的效率。
-  struct objc_protocol_list *protocols OBJC2_UNAVAILABLE; // 协议链表
-  #endif
-  } OBJC2_UNAVAILABLE;
-```
-
-objc在向一个对象发送消息时，runtime库会根据对象的isa指针找到该对象实际所属的类，然后在该类中的方法列表以及其父类方法列表中寻找方法运行，然后在发送消息的时候，objc_msgSend方法不会返回值，所谓的返回内容都是具体调用时执行的。
-那么，回到本题，如果向一个nil对象发送消息，首先在寻找对象的isa指针时就是0地址返回了，所以不会出现任何错误。
-
 
 ###17. objc中向一个对象发送消息[obj foo]和`objc_msgSend()`函数之间有什么关系？
 具体原因同上题：该方法编译之后就是`objc_msgSend()`函数调用.
