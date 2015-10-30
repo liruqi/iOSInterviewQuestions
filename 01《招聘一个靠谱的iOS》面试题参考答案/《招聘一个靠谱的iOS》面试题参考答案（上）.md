@@ -549,36 +549,10 @@ self.mutableArray = array;
  3. 不常用的：`nonnull`,`null_resettable`,`nullable`
 
 ###10. weak属性需要在dealloc中置nil么？
-不需要。
 
+不需要。weak 属性在 ARC 环境下才会出现。
 
 > 在ARC环境无论是强指针还是弱指针都无需在 dealloc 设置为 nil ， ARC 会自动帮我们处理
-
-即便是编译器不帮我们做这些，weak也不需要在 dealloc 中置nil：
-
-正如上文的：***runtime 如何实现 weak 属性*** 中提到的：
-
-我们模拟下 weak 的 setter 方法，应该如下：
-
-
- ```Objective-C
-- (void)setObject:(NSObject *)object
-{
-    objc_setAssociatedObject(self, "object", object, OBJC_ASSOCIATION_ASSIGN);
-    [object cyl_runAtDealloc:^{
-        _object = nil;
-    }];
-}
- ```
-
-
-也即:
-
-> 在属性所指的对象遭到摧毁时，属性值也会清空(nil out)。
-
-
-
-
 
 
 ###11. @synthesize和@dynamic分别有什么作用？
