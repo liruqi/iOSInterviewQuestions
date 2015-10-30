@@ -554,6 +554,7 @@ self.mutableArray = array;
 
 > 在ARC环境无论是强指针还是弱指针都无需在 dealloc 设置为 nil ， ARC 会自动帮我们处理
 
+参考[Transitioning to ARC Release Notes](https://developer.apple.com/library/ios/releasenotes/ObjectiveC/RN-TransitioningToARC/Introduction/Introduction.html)
 
 ###11. @synthesize和@dynamic分别有什么作用？
 
