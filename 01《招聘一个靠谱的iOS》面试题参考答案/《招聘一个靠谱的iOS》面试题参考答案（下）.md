@@ -550,13 +550,13 @@ autoreleasepool 以一个队列数组的形式实现,主要通过下列三个函
  ![enter image description here](http://i60.tinypic.com/15mfj11.jpg)
 
 ###37. 使用block时什么情况会发生引用循环，如何解决？
-一个对象中强引用了block，在block中又使用了该对象，就会发射循环引用。
-解决方法是将该对象使用__weak或者__block修饰符修饰之后再在block中使用。
+一个对象中强引用了block，在block中又使用了该对象，就会产生循环引用。
+解决方法是，ARC 环境下，在 block 外部用 `__weak` 修饰符创建弱引用对象，再在block中使用弱引用对象。Manual reference counting 环境下，用 `__block` 修饰符创建弱引用对象。如果希望兼容 iOS 4 或者 OS X 10.6，就用 `__block` 修饰符，并在 block 代码总设置 `__block` 变量为 `nil`。
 
+> In manual reference counting mode, __block id x; has the effect of not retaining x. In ARC mode, __block id x; defaults to retaining x (just like all other values). To get the manual reference counting mode behavior under ARC, you could use __unsafe_unretained __block id x;. As the name __unsafe_unretained implies, however, having a non-retained variable is dangerous (because it can dangle) and is therefore discouraged. Two better options are to either use __weak (if you don’t need to support iOS 4 or OS X v10.6), or set the __block value to nil to break the retain cycle.
 
- 1. id weak weakSelf = self;
-	或者 weak __typeof(&*self)weakSelf = self该方法可以设置宏
- 2. id __block weakSelf = self;
+参考：[Use Lifetime Qualifiers to Avoid Strong Reference Cycles](https://developer.apple.com/library/ios/releasenotes/ObjectiveC/RN-TransitioningToARC/Introduction/Introduction.html#//apple_ref/doc/uid/TP40011226-CH1-SW9)
+
 
 ###38. 在block内如何修改block外部变量？
 默认情况下，在block中访问的外部变量是复制过去的，即：**写操作不对原变量生效**。但是你可以加上`__block`来让其写操作生效，示例代码如下:
