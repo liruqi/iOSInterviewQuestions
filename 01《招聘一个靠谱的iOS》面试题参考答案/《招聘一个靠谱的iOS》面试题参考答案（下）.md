@@ -565,11 +565,8 @@ autoreleasepool 以一个队列数组的形式实现,主要通过下列三个函
 	void  (^foo)(void) = ^{ 
 	    a = 1; 
 	}
-	f00(); 
+	foo(); 
 	//这里，a的值被修改为1
-
-
-参考链接：[微博@唐巧_boy](http://weibo.com/tangqiaoboy)的著作《iOS开发进阶》中的第11.2.3章节
 
 ###39. 使用系统的某些block api（如UIView的block版本写动画时），是否也考虑引用循环问题？ 
 
@@ -651,10 +648,11 @@ dispatch_group_notify(group, dispatch_get_main_queue(), ^{
  在并行队列中，为了保持某些任务的顺序，需要等待一些任务完成后才能继续进行，使用 barrier 来等待之前任务完成，避免数据竞争等问题。 
  `dispatch_barrier_async` 函数会等待追加到Concurrent Dispatch Queue并行队列中的操作全部执行完之后，然后再执行 `dispatch_barrier_async` 函数追加的处理，等 `dispatch_barrier_async` 追加的处理执行结束之后，Concurrent Dispatch Queue才恢复之前的动作继续执行。
 
-打个比方：比如你们公司周末跟团旅游，高速休息站上，司机说：大家都去上厕所，速战速决，上完厕所就上高速。超大的公共厕所，大家同时去，程序猿很快就结束了，但程序媛就可能会慢一些，即使你第一个回来，司机也不会出发，司机要等待所有人都回来后，才能出发。 `dispatch_barrier_async` 函数追加的内容就如同 “上完厕所就上高速”这个动作。
+> Calls to this function always return immediately after the block has been submitted and never wait for the block to be invoked. When the barrier block reaches the front of a private concurrent queue, it is not executed immediately. Instead, the queue waits until its currently executing blocks finish executing. At that point, the barrier block executes by itself. Any blocks submitted after the barrier block are not executed until the barrier block completes.
 
-（注意：使用 `dispatch_barrier_async` ，该函数只能搭配自定义并行队列 `dispatch_queue_t` 使用。不能使用： `dispatch_get_global_queue` ，否则 `dispatch_barrier_async` 的作用会和 `dispatch_async` 的作用一模一样。 ）
+> The queue you specify should be a concurrent queue that you create yourself using the dispatch_queue_create function. If the queue you pass to this function is a serial queue or one of the global concurrent queues, this function behaves like the dispatch_async function.
 
+参考 [dispatch_barrier_async](https://developer.apple.com/library/prerelease/ios/documentation/Performance/Reference/GCD_libdispatch_Ref/index.html#//apple_ref/c/func/dispatch_barrier_async)
 
 ###43. 苹果为什么要废弃`dispatch_get_current_queue`？
 
